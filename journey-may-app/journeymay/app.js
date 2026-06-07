@@ -42,8 +42,108 @@ window.addEventListener('appinstalled',()=>document.getElementById('install-bann
 function installApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('install-banner').classList.add('hidden');});}}
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 
-// ---- NOTAS ----
+// ---- MIGRATION ----
 const NOTE_COLORS=['#FFF5F7','#FFF0F5','#FFF8FA','#FDEEF4'];
+
+function migrateNotas(){
+  const raw=load('notas',[]);
+  let changed=false;
+  const migrated=raw.map((n,i)=>{
+    if(n.id&&n.cor&&n.data)return n;
+    changed=true;
+    return{
+      id:n.id||String(Date.now()+i),
+      titulo:n.titulo||'',
+      corpo:n.corpo||'',
+      cor:n.cor||NOTE_COLORS[i%NOTE_COLORS.length],
+      data:n.data||''
+      // campo 'cat' descartado
+    };
+  });
+  if(changed)save('notas',migrated);
+}
+
+function migrateEvents(){
+  const raw=load('events',[]);
+  const TIPO_CAT={rose:'pessoal',green:'trabalho'};
+  let changed=false;
+  const migrated=raw.map(ev=>{
+    if(ev.day!==undefined&&ev.month!==undefined&&ev.year!==undefined)return ev;
+    changed=true;
+    let day=now.getDate(),month=now.getMonth(),year=now.getFullYear();
+    if(ev.data){
+      if(ev.data.includes('-')){
+        // formato YYYY-MM-DD (vindo de <input type="date">)
+        const d=new Date(ev.data+'T00:00:00');
+        day=d.getDate();month=d.getMonth();year=d.getFullYear();
+      }else if(ev.data.includes('/')){
+        // formato DD/MM exibido no front antigo
+        const p=ev.data.split('/');
+        day=parseInt(p[0],10);month=parseInt(p[1],10)-1;year=now.getFullYear();
+      }
+    }
+    return{
+      id:ev.id?String(ev.id):String(Date.now()),
+      nome:ev.nome||'',
+      hora:ev.hora||'',
+      categoria:ev.categoria||TIPO_CAT[ev.tipo]||'pessoal',
+      done:ev.done||false,
+      day,month,year
+    };
+  });
+  if(changed)save('events',migrated);
+}
+
+function migrateMetas(){
+  const raw=load('metas',[]);
+  let changed=false;
+  const migrated=raw.map((m,i)=>{
+    if(m.id&&m.unidade!==undefined&&m.categoria&&m.prioridade&&m.subtarefas)return m;
+    changed=true;
+    return{
+      id:m.id?String(m.id):String(Date.now()+i),
+      nome:m.nome||'',
+      atual:m.atual||0,
+      total:m.total||100,
+      unidade:m.unidade||'',
+      categoria:m.categoria||'pessoal',
+      prioridade:m.prioridade||'media',
+      prazo:m.prazo||'',
+      subtarefas:m.subtarefas||[]
+      // campo 'pct' descartado (calculado no render)
+    };
+  });
+  if(changed)save('metas',migrated);
+}
+
+function migrateLancamentos(){
+  const raw=load('lancamentos',[]);
+  let changed=false;
+  const migrated=raw.map(l=>{
+    if(l.categoria&&l.data)return l;
+    changed=true;
+    return{
+      id:l.id?String(l.id):String(Date.now()),
+      desc:l.desc||'',
+      val:l.val||0,
+      tipo:l.tipo||'exp',
+      categoria:l.categoria||'outros',
+      data:l.data||''
+    };
+  });
+  if(changed)save('lancamentos',migrated);
+}
+
+function migrateAll(){
+  migrateNotas();
+  migrateEvents();
+  migrateMetas();
+  migrateLancamentos();
+}
+
+migrateAll();
+
+// ---- NOTAS ----
 let notas=load('notas',[]);
 
 function renderNotas(){
@@ -86,16 +186,6 @@ renderNotas();
 
 // ---- EVENTS ----
 let events=load('events',[]);
-
-// Migrate old format (date string → day/month/year)
-events=events.map(ev=>{
-  if(ev.data&&ev.day===undefined){
-    const d=new Date(ev.data+'T00:00:00');
-    return{...ev,day:d.getDate(),month:d.getMonth(),year:d.getFullYear(),categoria:ev.categoria||'pessoal',done:ev.done||false};
-  }
-  return ev;
-});
-save('events',events);
 
 const CAT_COLORS={pessoal:'#F2A0B8',saude:'#E8648A',trabalho:'#C45070',social:'#FABDD0'};
 let calYear=now.getFullYear(),calMonth=now.getMonth(),selectedDay=now.getDate();
@@ -169,9 +259,6 @@ renderCal();
 
 // ---- METAS ----
 let metas=load('metas',[]);
-
-// Migrate old format
-metas=metas.map(m=>({id:m.id||Date.now().toString(),nome:m.nome,atual:m.atual||0,total:m.total||100,unidade:m.unidade||'',categoria:m.categoria||'pessoal',prioridade:m.prioridade||'media',prazo:m.prazo||'',subtarefas:m.subtarefas||[]}));
 
 const CAT_EMOJI_META={saude:'💪',estudo:'📚',financeiro:'💰',pessoal:'🌸',trabalho:'💼'};
 
