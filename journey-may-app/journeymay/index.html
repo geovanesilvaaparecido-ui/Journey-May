@@ -16,184 +16,338 @@
 <body>
 <div class="app-shell">
 
-<div class="splash">
+<!-- SPLASH -->
+<div class="splash" id="splash">
   <div class="splash-flowers">🌸🌷🌸</div>
   <div class="splash-name">Journey May</div>
   <div class="splash-sub">seu planejador pessoal</div>
 </div>
 
-<!-- INSTALL BANNER -->
-<div class="install-banner hidden" id="install-banner">
-  <div class="install-icon">📲</div>
-  <div class="install-body">
-    <div class="install-title">Instalar no celular</div>
-    <div class="install-sub">Adicione à tela inicial para usar como app</div>
-  </div>
-  <button class="install-btn" id="install-btn" onclick="installApp()">Instalar</button>
-  <button class="btn-del" onclick="document.getElementById('install-banner').classList.add('hidden')">✕</button>
-</div>
-
-<!-- MODAL NOVO EVENTO -->
-<div class="modal-overlay hidden" id="modal-overlay" onclick="handleOverlayClick(event)">
-  <div class="modal-sheet" id="modal-sheet">
+<!-- MODAL NOTA -->
+<div class="modal-overlay hidden" id="modal-nota" onclick="handleModalClick(event,'modal-nota')">
+  <div class="modal-sheet">
     <div class="modal-header">
-      <span class="modal-title-head">🌸 Novo evento</span>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <span class="modal-title-head">📝 Nova nota</span>
+      <button class="modal-close" onclick="closeModal('modal-nota')">✕</button>
     </div>
     <div class="modal-body">
-      <input class="modal-title-input" id="modal-ev-title" type="text" placeholder="Adicionar título...">
-      <div class="modal-row">
-        <div class="modal-field"><label>Data</label><input type="date" id="modal-ev-date"></div>
-        <div class="modal-field"><label>Tipo</label>
-          <select id="modal-ev-tipo" onchange="selectTipo(this.value)">
-            <option value="rose">🌸 Pessoal</option>
-            <option value="green">💼 Trabalho</option>
+      <input class="modal-title-input" id="n-titulo" type="text" placeholder="Título da nota...">
+      <textarea class="modal-textarea" id="n-corpo" placeholder="Escreva aqui..."></textarea>
+      <button class="btn-save" onclick="addNota()">Salvar nota 🌷</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EVENTO -->
+<div class="modal-overlay hidden" id="modal-evento" onclick="handleModalClick(event,'modal-evento')">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <span class="modal-title-head">🌸 Novo evento</span>
+      <button class="modal-close" onclick="closeModal('modal-evento')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input class="modal-title-input" id="ev-nome" type="text" placeholder="Título do evento...">
+      <div class="form-row">
+        <div class="fg">
+          <label class="lbl">Horário</label>
+          <input type="time" id="ev-hora" value="09:00">
+        </div>
+        <div class="fg">
+          <label class="lbl">Categoria</label>
+          <select id="ev-cat">
+            <option value="pessoal">🌸 Pessoal</option>
+            <option value="saude">💊 Saúde</option>
+            <option value="trabalho">💼 Trabalho</option>
+            <option value="social">🎀 Social</option>
           </select>
         </div>
       </div>
-      <div class="modal-allday">
-        <input type="checkbox" id="modal-allday" onchange="toggleAllDay(this)">
-        <label for="modal-allday">Dia inteiro</label>
-      </div>
-      <div id="modal-time-fields">
-        <div class="modal-row">
-          <div class="modal-field"><label>Início</label><input type="time" id="modal-ev-start" value="09:00"></div>
-          <div class="modal-field"><label>Término</label><input type="time" id="modal-ev-end" value="10:00"></div>
-        </div>
-      </div>
-      <div style="margin-bottom:16px;">
-        <label class="lbl" style="margin-bottom:8px;">Categoria</label>
-        <div class="modal-type-row">
-          <div class="type-opt selected" id="opt-pessoal" onclick="selectTipo('rose')">
-            <div class="type-opt-dot" style="background:var(--rose)"></div><span>Pessoal</span>
-          </div>
-          <div class="type-opt" id="opt-trabalho" onclick="selectTipo('green')">
-            <div class="type-opt-dot" style="background:var(--green)"></div><span>Trabalho</span>
-          </div>
-        </div>
-      </div>
-      <label class="lbl" style="margin-bottom:6px;">Descrição</label>
-      <textarea class="modal-desc" id="modal-ev-desc" placeholder="Detalhes opcionais..."></textarea>
-      <button class="btn-save" onclick="saveModalEvent()">Salvar evento 🌷</button>
+      <button class="btn-save" onclick="addEvento()">Salvar evento 🌷</button>
     </div>
   </div>
 </div>
 
-<div class="status-bar">
-  <span class="status-time" id="clock">09:41</span>
-  <div class="status-dots"><div class="sdot"></div><div class="sdot"></div><div class="sdot" style="opacity:.4"></div></div>
-</div>
-<div class="top-header">
-  <div class="header-row">
-    <div class="brand">
-      <div class="brand-icon">🌸</div>
-      <div><div class="brand-name">Journey May</div><div class="brand-sub">planejador pessoal</div></div>
+<!-- MODAL META -->
+<div class="modal-overlay hidden" id="modal-meta" onclick="handleModalClick(event,'modal-meta')">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <span class="modal-title-head">🎯 Nova meta</span>
+      <button class="modal-close" onclick="closeModal('modal-meta')">✕</button>
     </div>
-    <div class="hdate"><div class="hday" id="hday">5</div><div class="hmonth" id="hmonth">Junho 2026</div></div>
+    <div class="modal-body">
+      <input class="modal-title-input" id="m-nome" type="text" placeholder="Nome da meta...">
+      <div class="form-row">
+        <div class="fg">
+          <label class="lbl">Meta numérica</label>
+          <input type="number" id="m-total" placeholder="100" min="1">
+        </div>
+        <div class="fg">
+          <label class="lbl">Unidade</label>
+          <input type="text" id="m-unidade" placeholder="livros, km...">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label class="lbl">Categoria</label>
+          <select id="m-cat">
+            <option value="saude">💪 Saúde</option>
+            <option value="estudo">📚 Estudo</option>
+            <option value="financeiro">💰 Financeiro</option>
+            <option value="pessoal">🌸 Pessoal</option>
+            <option value="trabalho">💼 Trabalho</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="lbl">Prioridade</label>
+          <select id="m-prio">
+            <option value="alta">Alta</option>
+            <option value="media">Média</option>
+            <option value="baixa">Baixa</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="lbl">Prazo</label>
+        <input type="date" id="m-prazo">
+      </div>
+      <button class="btn-save" onclick="addMeta()">Salvar meta 🌷</button>
+    </div>
   </div>
-</div>
-<div class="greeting">
-  <div class="g-avatar">M</div>
-  <div>
-    <div class="g-hi">Olá,</div>
-    <div class="g-name">May 🌷</div>
-    <div class="g-quote">Cada dia é uma nova página da sua jornada.</div>
-  </div>
-</div>
-<div class="nav-tabs">
-  <button class="tab active" onclick="showSection('notas',this)"><span class="ti">📝</span>Notas</button>
-  <button class="tab" onclick="showSection('rotina',this)"><span class="ti">🌸</span>Agenda</button>
-  <button class="tab" onclick="showSection('metas',this)"><span class="ti">🎯</span>Metas</button>
-  <button class="tab" onclick="showSection('financeiro',this)"><span class="ti">💰</span>Finanças</button>
 </div>
 
-<div class="scroll-area">
+<!-- MODAL FINANÇAS -->
+<div class="modal-overlay hidden" id="modal-fin" onclick="handleModalClick(event,'modal-fin')">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <span class="modal-title-head">💰 Novo lançamento</span>
+      <button class="modal-close" onclick="closeModal('modal-fin')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fin-tipo-btns">
+        <button class="fin-tipo-btn active" id="fin-btn-rec" onclick="setFinTipo('rec')">💚 Receita</button>
+        <button class="fin-tipo-btn" id="fin-btn-exp" onclick="setFinTipo('exp')">🔴 Despesa</button>
+      </div>
+      <input class="modal-title-input" id="f-desc" type="text" placeholder="Descrição...">
+      <div class="form-row">
+        <div class="fg">
+          <label class="lbl">Valor (R$)</label>
+          <input type="number" id="f-val" placeholder="0,00" min="0" step="0.01">
+        </div>
+        <div class="fg">
+          <label class="lbl">Categoria</label>
+          <select id="f-cat"></select>
+        </div>
+      </div>
+      <button class="btn-save" onclick="addFin()">Salvar lançamento 🌷</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCROLL AREA -->
+<div class="scroll-area" id="scroll-area">
+
+  <!-- INSTALL BANNER -->
+  <div class="install-banner hidden" id="install-banner">
+    <div class="install-icon">📲</div>
+    <div class="install-body">
+      <div class="install-title">Instalar no celular</div>
+      <div class="install-sub">Adicione à tela inicial para usar como app</div>
+    </div>
+    <button class="install-btn" onclick="installApp()">Instalar</button>
+    <button class="btn-close-sm" onclick="document.getElementById('install-banner').classList.add('hidden')">✕</button>
+  </div>
+
+  <!-- HOME -->
+  <div id="sec-home" class="section active">
+    <div class="floral-tr" aria-hidden="true">
+      <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
+        <circle cx="65" cy="65" r="22" fill="#E8648A"/>
+        <circle cx="65" cy="30" r="14" fill="#F2A0B8"/>
+        <circle cx="96" cy="84" r="12" fill="#E8648A"/>
+        <circle cx="34" cy="84" r="12" fill="#F2A0B8"/>
+        <circle cx="96" cy="46" r="9"  fill="#FABDD0"/>
+        <circle cx="34" cy="46" r="9"  fill="#FABDD0"/>
+        <circle cx="65" cy="100" r="10" fill="#F2A0B8"/>
+      </svg>
+    </div>
+    <div class="floral-bl" aria-hidden="true">
+      <svg width="110" height="110" viewBox="0 0 110 110" fill="none">
+        <circle cx="55" cy="55" r="18" fill="#F2A0B8"/>
+        <circle cx="55" cy="25" r="12" fill="#E8648A"/>
+        <circle cx="82" cy="72" r="10" fill="#FABDD0"/>
+        <circle cx="28" cy="72" r="10" fill="#E8648A"/>
+        <circle cx="82" cy="38" r="8"  fill="#F2A0B8"/>
+        <circle cx="28" cy="38" r="8"  fill="#FABDD0"/>
+      </svg>
+    </div>
+
+    <div class="home-welcome">
+      <div class="hw-avatar">M</div>
+      <div class="hw-text">
+        <div class="hw-hi">Olá, May 🌷</div>
+        <div class="hw-date" id="hw-date"></div>
+      </div>
+    </div>
+
+    <div class="home-cards">
+      <div class="home-card" onclick="showSection('notas')">
+        <div class="hc-header">
+          <span class="hc-icon">📝</span>
+          <span class="hc-title">Notas</span>
+          <span class="hc-link">ver tudo ›</span>
+        </div>
+        <div id="home-notas-preview" class="hc-content"></div>
+      </div>
+
+      <div class="home-card" onclick="showSection('agenda')">
+        <div class="hc-header">
+          <span class="hc-icon">🌸</span>
+          <span class="hc-title">Agenda de hoje</span>
+          <span class="hc-link">ver tudo ›</span>
+        </div>
+        <div id="home-agenda-preview" class="hc-content"></div>
+      </div>
+
+      <div class="home-card" onclick="showSection('metas')">
+        <div class="hc-header">
+          <span class="hc-icon">🎯</span>
+          <span class="hc-title">Metas</span>
+          <span class="hc-link">ver tudo ›</span>
+        </div>
+        <div id="home-metas-preview" class="hc-content"></div>
+      </div>
+
+      <div class="home-card" onclick="showSection('financeiro')">
+        <div class="hc-header">
+          <span class="hc-icon">💰</span>
+          <span class="hc-title">Finanças</span>
+          <span class="hc-link">ver tudo ›</span>
+        </div>
+        <div id="home-fin-preview" class="hc-content"></div>
+      </div>
+
+      <div class="home-card home-quote">
+        <div class="quote-flower">🌷</div>
+        <div class="quote-text">Floresça onde você foi plantada.</div>
+      </div>
+    </div>
+  </div>
 
   <!-- NOTAS -->
-  <div id="sec-notas" class="section active">
-    <div class="add-form">
-      <div class="fg"><label class="lbl">Título</label><input type="text" id="n-titulo" placeholder="nome da nota..."></div>
-      <div class="fg"><label class="lbl">Conteúdo</label><textarea id="n-corpo" placeholder="escreva aqui..."></textarea></div>
-      <div class="fg"><label class="lbl">Categoria</label>
-        <select id="n-cat"><option value="pessoal">pessoal</option><option value="trabalho">trabalho</option><option value="urgente">urgente</option><option value="ideia">ideia</option></select>
-      </div>
-      <button class="btn-add" onclick="addNota()">+ Adicionar nota</button>
+  <div id="sec-notas" class="section">
+    <div class="sec-header">
+      <h2 class="sec-title">Notas</h2>
     </div>
-    <div class="sec-lbl">Suas notas</div>
-    <div class="card"><ul id="lista-notas" style="list-style:none;"></ul></div>
+    <div class="search-bar-wrap">
+      <input type="text" class="search-bar" id="nota-search" placeholder="🔍 Buscar notas..." oninput="renderNotas()">
+    </div>
+    <div id="lista-notas" class="notas-grid"></div>
   </div>
 
   <!-- AGENDA -->
-  <div id="sec-rotina" class="section">
-    <div class="cal-toggle">
-      <button class="cal-btn active" id="btn-mensal" onclick="switchCal('mensal')">📅 Mensal</button>
-      <button class="cal-btn" id="btn-semanal" onclick="switchCal('semanal')">📆 Semanal</button>
+  <div id="sec-agenda" class="section">
+    <div class="sec-header">
+      <h2 class="sec-title">Agenda</h2>
     </div>
-    <button class="btn-new-event" onclick="openModal()"><span style="font-size:18px;">+</span> Novo evento</button>
-    <div id="cal-mensal">
-      <div class="card" style="margin-bottom:12px;">
-        <div class="cal-nav">
-          <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
-          <span class="cal-nav-title" id="cal-title"></span>
-          <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
-        </div>
-        <div class="cal-dnames">
-          <div class="cal-dname">Dom</div><div class="cal-dname">Seg</div><div class="cal-dname">Ter</div>
-          <div class="cal-dname">Qua</div><div class="cal-dname">Qui</div><div class="cal-dname">Sex</div><div class="cal-dname">Sáb</div>
-        </div>
-        <div class="cal-grid-m" id="cal-grid"></div>
+    <div class="card cal-card">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+        <span class="cal-nav-title" id="cal-title"></span>
+        <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
       </div>
-      <div class="sec-lbl">Compromissos</div>
-      <div class="card"><ul id="lista-eventos" style="list-style:none;"></ul></div>
-    </div>
-    <div id="cal-semanal" style="display:none;">
-      <div class="week-wrap">
-        <div class="week-nav-bar">
-          <button class="cal-nav-btn" onclick="changeWeek(-1)">‹</button>
-          <span class="week-nav-title" id="week-title"></span>
-          <button class="cal-nav-btn" onclick="changeWeek(1)">›</button>
-        </div>
-        <div class="week-scroll"><div class="week-table" id="week-table"></div></div>
+      <div class="cal-dnames">
+        <div class="cal-dname">Dom</div><div class="cal-dname">Seg</div><div class="cal-dname">Ter</div>
+        <div class="cal-dname">Qua</div><div class="cal-dname">Qui</div><div class="cal-dname">Sex</div><div class="cal-dname">Sáb</div>
       </div>
+      <div class="cal-grid-m" id="cal-grid"></div>
     </div>
+    <div class="sec-lbl" id="ev-day-label">Eventos</div>
+    <div id="lista-eventos"></div>
   </div>
 
   <!-- METAS -->
   <div id="sec-metas" class="section">
-    <div class="add-form">
-      <div class="fg"><label class="lbl">Meta</label><input type="text" id="m-nome" placeholder="ex: ler 12 livros no ano"></div>
-      <div class="row2">
-        <div><label class="lbl">Progresso atual</label><input type="number" id="m-atual" placeholder="0" min="0"></div>
-        <div><label class="lbl">Total</label><input type="number" id="m-total" placeholder="100" min="1"></div>
-      </div>
-      <button class="btn-add" onclick="addMeta()">+ Adicionar meta</button>
+    <div class="sec-header">
+      <h2 class="sec-title">Metas</h2>
     </div>
-    <div class="sec-lbl">Suas metas</div>
-    <div class="card"><ul id="lista-metas" style="list-style:none;"></ul></div>
+    <div class="meta-banner">
+      <div class="mb-circle-wrap">
+        <svg class="mb-svg" viewBox="0 0 80 80">
+          <circle class="mb-track" cx="40" cy="40" r="34"/>
+          <circle class="mb-fill" id="mb-fill-circle" cx="40" cy="40" r="34"/>
+        </svg>
+        <div class="mb-pct" id="mb-pct-text">0%</div>
+      </div>
+      <div class="mb-info">
+        <div class="mb-label">Progresso geral</div>
+        <div class="mb-sub" id="mb-sub-text">0 de 0 metas concluídas</div>
+      </div>
+    </div>
+    <div id="lista-metas"></div>
   </div>
 
   <!-- FINANCEIRO -->
   <div id="sec-financeiro" class="section">
-    <div class="fin-summary">
-      <div class="fc"><div class="fc-lbl">Receitas</div><div class="fc-val" id="tot-rec" style="color:var(--green)">R$0</div></div>
-      <div class="fc"><div class="fc-lbl">Despesas</div><div class="fc-val" id="tot-exp" style="color:var(--red)">R$0</div></div>
-      <div class="fc"><div class="fc-lbl">Saldo</div><div class="fc-val" id="tot-sal">R$0</div></div>
+    <div class="sec-header">
+      <h2 class="sec-title">Finanças</h2>
     </div>
-    <div class="add-form">
-      <div class="fg"><label class="lbl">Descrição</label><input type="text" id="f-desc" placeholder="ex: salário, aluguel..."></div>
-      <div class="row2">
-        <div><label class="lbl">Valor (R$)</label><input type="number" id="f-val" placeholder="0,00" min="0" step="0.01"></div>
-        <div><label class="lbl">Tipo</label><select id="f-tipo"><option value="rec">receita</option><option value="exp">despesa</option></select></div>
+    <div class="fin-saldo-card">
+      <div class="fsc-icon">👜</div>
+      <div class="fsc-label">Saldo do mês</div>
+      <div class="fsc-val" id="fin-saldo">R$ 0,00</div>
+      <div class="fsc-row">
+        <div class="fsc-item">
+          <div class="fsc-sub">Receitas</div>
+          <div class="fsc-sub-val" id="fin-rec">R$ 0,00</div>
+        </div>
+        <div class="fsc-divider"></div>
+        <div class="fsc-item">
+          <div class="fsc-sub">Despesas</div>
+          <div class="fsc-sub-val" id="fin-exp">R$ 0,00</div>
+        </div>
       </div>
-      <button class="btn-add" onclick="addFin()">+ Lançar</button>
     </div>
-    <div class="sec-lbl">Lançamentos</div>
-    <div class="card"><ul id="lista-fin" style="list-style:none;"></ul></div>
+    <div class="fin-tabs">
+      <button class="fin-tab active" onclick="setFinFilter('todos',this)">Todos</button>
+      <button class="fin-tab" onclick="setFinFilter('rec',this)">Receitas</button>
+      <button class="fin-tab" onclick="setFinFilter('exp',this)">Despesas</button>
+    </div>
+    <div id="lista-fin"></div>
   </div>
 
-</div>
-</div>
+</div><!-- end scroll-area -->
 
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="showSection('home')">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Home</span>
+  </button>
+  <button class="nav-btn" id="nav-notas" onclick="showSection('notas')">
+    <span class="nav-icon">📝</span>
+    <span class="nav-label">Notas</span>
+  </button>
+  <button class="nav-btn" id="nav-agenda" onclick="showSection('agenda')">
+    <span class="nav-icon">🌸</span>
+    <span class="nav-label">Agenda</span>
+  </button>
+  <button class="nav-btn" id="nav-metas" onclick="showSection('metas')">
+    <span class="nav-icon">🎯</span>
+    <span class="nav-label">Metas</span>
+  </button>
+  <button class="nav-btn" id="nav-financeiro" onclick="showSection('financeiro')">
+    <span class="nav-icon">💰</span>
+    <span class="nav-label">Finanças</span>
+  </button>
+</nav>
+
+<!-- FABs -->
+<button class="fab hidden" id="fab-notas"     onclick="openModal('modal-nota')">+</button>
+<button class="fab hidden" id="fab-agenda"    onclick="openModal('modal-evento')">+</button>
+<button class="fab hidden" id="fab-metas"     onclick="openModal('modal-meta')">+</button>
+<button class="fab hidden" id="fab-financeiro" onclick="openFinModal()">+</button>
+
+</div><!-- end app-shell -->
 <script src="./app.js"></script>
 </body>
 </html>
